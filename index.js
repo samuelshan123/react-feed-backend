@@ -26,7 +26,7 @@ const MongoClient = mongodb.MongoClient;
 var db;
 
 MongoClient
-  .connect('mongodb://localhost:27017', {
+  .connect('mongodb://os-admin:Os-admin123!@localhost:27017', {
     useNewUrlParser: true,
     useUnifiedTopology: true
   })
@@ -53,6 +53,36 @@ app.post('/create',async (req, res) => {
         res.send({code:0})
     }
   });
+
+  app.post('/login',async (req, res) => {
+    try {
+        const user = await db.findOne(req.body);
+        delete user.password;
+        res.send({code:1,user})
+    } catch (error) {
+        res.send({code:0})
+    }
+  });
+
+  app.post('/register',async (req, res) => {
+    try {
+        const user = await db.findOne(req.body.email);
+        if(user){
+          res.send({code:2,info:"user already exists"})
+        }
+        else{
+          await db.insertOne(req.body);
+          const {email,name} =req.body;
+          const user= {
+            email,name
+          }
+          res.send({code:1,user})
+        }
+    } catch (error) {
+        res.send({code:0})
+    }
+  });
+
 
 
   app.get('/getnews',async (req, res) => {
